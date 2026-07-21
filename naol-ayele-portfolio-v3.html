@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Naol Ayele — Software Engineer Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+<style>
+  :root {
+    --bg: #090606;
+    --panel: #110A09;
+    --panel-sub: #180F0E;
+    --border: rgba(255, 255, 255, 0.05);
+    --border-active: rgba(235, 59, 36, 0.3);
+    --ink: #FFFFFF;
+    --ink-dim: #9E9492;
+    --red-primary: #EB3B24;
+    --red-glow: rgba(235, 59, 36, 0.2);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; background: var(--bg); }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    overflow-x: hidden;
+    letter-spacing: -0.01em;
+  }
+
+  body::before {
+    content: "";
+    position: fixed; inset: 0; pointer-events: none; z-index: 999; opacity: 0.02;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+
+  /* Navigation Bar matching Reference Image */
+  nav {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 100;
+    background: transparent;
+  }
+  nav .container {
+    height: 90px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo-area { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.95rem; }
+  .logo-box { width: 28px; height: 28px; background: #FFFFFF; color: #000; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.75rem; }
+  .nav-links { display: flex; gap: 32px; }
+  .nav-links a { color: var(--ink-dim); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--ink); }
+  .btn-talk { background: #FFFFFF; color: #000; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: opacity 0.2s; }
+  .btn-talk:hover { opacity: 0.9; }
+
+  .nav-toggle {
+    display: none;
+    width: 40px; height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .nav-toggle span { width: 16px; height: 1.5px; background: #FFF; transition: 0.25s ease; }
+  .nav-toggle.open span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+
+  .mobile-nav-drawer {
+    position: fixed;
+    top: 0; right: 0;
+    height: 100vh;
+    width: min(78vw, 320px);
+    background: #0C0807;
+    border-left: 1px solid var(--border);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 100px 32px 40px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  .mobile-nav-drawer.open { transform: translateX(0); }
+  .mobile-nav-drawer a {
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 1.05rem;
+    font-weight: 500;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .mobile-nav-drawer .btn-talk { margin-top: 24px; text-align: center; }
+  .nav-scrim {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 150;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .nav-scrim.open { opacity: 1; pointer-events: auto; }
+
+  /* Redesigned Hero Section to exactly match the target Layout image */
+  .hero { 
+    position: relative; 
+    height: 100vh; 
+    min-height: 720px;
+    display: flex; 
+    align-items: center; 
+    overflow: hidden; 
+    background: radial-gradient(circle at 75% 40%, #40100a 0%, #090606 65%);
+  }
+
+  /* Full-bleed right-aligned avatar layer underneath the grid overlay */
+  .hero-image-pane {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .hero-avatar-container {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    height: 85%;
+    width: auto;
+    aspect-ratio: 0.82;
+    transform: translate(-10%, -7%);
+  }
+  .hero-avatar { 
+    display: block;
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    object-position: top center;
+    /* Clean white/red inner outline mask approximation around profile cutout */
+    filter: drop-shadow(0 0 20px rgba(255,255,255,0.15)) drop-shadow(0 0 1px #ffffff);
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 90%);
+    mask-image: linear-gradient(to bottom, black 70%, transparent 90%);
+  }
+
+  /* Structural Ambient Grid Layer exactly matching the screenshot */
+  .hero-grid-overlay {
+    position: absolute; inset: 0; 
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px), 
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 55px 55px; 
+    background-position: center top;
+    z-index: 2;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 95%);
+    mask-image: linear-gradient(to bottom, black 60%, transparent 95%);
+  }
+
+  /* Bottom fade vignette mask covering the lower bounds of the layout */
+  .hero-bottom-fade {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 25vh;
+    background: linear-gradient(to top, #090606 20%, transparent);
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .hero .container { 
+    position: relative; 
+    z-index: 4; 
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 80px;
+  }
+  
+  .hero-content-box { max-width: 580px; margin-bottom: 40px; }
+  .hero-content-box h1 { 
+    font-size: clamp(2.4rem, 4.4vw, 3.6rem); 
+    font-weight: 500; 
+    line-height: 1.12; 
+    letter-spacing: -0.03em; 
+    margin-bottom: 20px; 
+    color: #FFFFFF;
+  }
+  .hero-content-box h1 span { font-weight: 700; }
+  .hero-content-box p { 
+    font-size: 0.98rem; 
+    color: var(--ink-dim); 
+    line-height: 1.6; 
+    max-width: 480px; 
+    margin-bottom: 36px; 
+  }
+  
+  /* Buttons exactly matched to layout specifications */
+  .hero-actions { display: flex; gap: 12px; }
+  .btn-hero-talk { background: #FFFFFF; color: #000000; font-weight: 600; font-size: 0.88rem; padding: 14px 32px; border-radius: 8px; text-decoration: none; line-height: 1; transition: opacity 0.2s; }
+  .btn-hero-talk:hover { opacity: 0.9; }
+  .btn-hero-chat { background: #FFFFFF; color: #000000; font-weight: 600; font-size: 0.88rem; padding: 14px 32px; border-radius: 8px; text-decoration: none; line-height: 1; transition: opacity 0.2s; }
+  .btn-hero-chat:hover { opacity: 0.9; }
+  .btn-hero-resume { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.15); color: #FFFFFF; font-weight: 600; font-size: 0.88rem; padding: 14px 32px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; line-height: 1; transition: background-color 0.2s; }
+  .btn-hero-resume:hover { background: rgba(255, 255, 255, 0.08); }
+
+  /* Infinite marquee tech stack dock at bottom */
+  .hero-marquee-wrapper {
+    position: absolute;
+    bottom: 45px;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .hero-marquee-track {
+    display: flex;
+    gap: 70px;
+    white-space: nowrap;
+    animation: marquee 25s linear infinite;
+    width: max-content;
+  }
+  .dock-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #FFFFFF;
+    font-weight: 500;
+    opacity: 0.45;
+    white-space: nowrap;
+  }
+  .dock-item i { font-size: 1.15rem; }
+
+  @keyframes marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* Main Split Content Sections */
+  .main-split-view { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border); }
+  .column-left { padding: 100px 40px 100px 0; border-right: 1px solid var(--border); }
+  .column-right { padding: 100px 0 100px 40px; }
+
+  .section-title { font-size: 1.9rem; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 40px; }
+  .section-title span { color: var(--ink-dim); display: block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 12px; font-weight: 600; }
+
+  /* Left Side: Projects Stack */
+  .project-list { display: flex; flex-direction: column; gap: 44px; }
+  .project-card { display: block; text-decoration: none; color: inherit; }
+  .project-window { background: #0E0908; border: 1px solid var(--border); border-radius: 16px; aspect-ratio: 16/10; overflow: hidden; margin-bottom: 20px; position: relative; transition: border-color 0.3s; display: flex; align-items: center; justify-content: center; }
+  .project-card:hover .project-window { border-color: var(--border-active); }
+  
+  
+  .project-info { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .project-meta h3 { font-size: 1.15rem; font-weight: 500; margin-bottom: 6px; padding-left: 4px; }
+  .project-meta p { font-size: 0.88rem; color: var(--ink-dim); line-height: 1.5; margin-bottom: 12px; }
+  .project-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .project-tags span { font-size: 0.72rem; background: var(--panel-sub); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; color: var(--ink-dim); }
+  .project-link-icon { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: var(--ink-dim); transition: 0.2s; }
+  .project-card:hover .project-link-icon { color: #FFF; border-color: rgba(255,255,255,0.3); }
+  .project-links-row { display: flex; flex-direction: row; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  /* Right Side: Philosophy / Pillar Bento Grid */
+  .pillars-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 64px; }
+  .pillar-card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 32px; position: relative; transition: border-color 0.3s; }
+  .pillar-card:hover { border-color: rgba(255,255,255,0.1); }
+  .pillar-card h4 { font-size: 1.05rem; font-weight: 500; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
+  .pillar-card h4::before { content: ""; width: 6px; height: 6px; background: var(--red-primary); border-radius: 50%; }
+  .pillar-card p { font-size: 0.88rem; color: var(--ink-dim); line-height: 1.6; }
+  
+  /* Embedded Player block matching image philosophy player */
+  .philosophy-player { background: #0E0908; border: 1px solid var(--border); border-radius: 16px; padding: 40px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; margin-top: 40px; position: relative; overflow: hidden; }
+  .philosophy-player::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(235,59,36,0.04)); }
+  .play-button { width: 54px; height: 54px; background: #FFF; color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s; z-index: 2; }
+  .play-button:hover { transform: scale(1.05); }
+
+  /* Experience / Milestone Timeline Rows */
+  .timeline-container { display: flex; flex-direction: column; border-top: 1px solid var(--border); padding-top: 20px; }
+  .timeline-row { display: grid; grid-template-columns: 0.35fr 0.65fr; padding: 24px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.9rem; }
+  .timeline-time { color: var(--ink-dim); }
+  .timeline-desc h5 { font-size: 0.95rem; font-weight: 500; margin-bottom: 4px; color: var(--ink); }
+  .timeline-desc p { color: var(--ink-dim); line-height: 1.5; font-size: 0.85rem; }
+
+  /* Footer Section Layout */
+  footer { border-top: 1px solid var(--border); padding: 60px 0; background: #060404; }
+  .footer-grid { display: flex; justify-content: space-between; align-items: center; color: var(--ink-dim); font-size: 0.85rem; }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { color: var(--ink-dim); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: #FFF; }
+
+  /* Contact form section */
+  .contact-section {
+    padding: 100px 0;
+    border-top: 1px solid var(--border);
+  }
+  .contact-section .section-title { margin-bottom: 50px; }
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+  .contact-info p { color: var(--ink-dim); font-size: 0.95rem; line-height: 1.7; margin-bottom: 30px; max-width: 420px; }
+  .contact-links { display: flex; flex-direction: column; gap: 14px; }
+  .contact-links a {
+    color: var(--ink);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    padding: 13px 24px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    transition: 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+  }
+  .contact-links a:hover { border-color: var(--red-primary); color: var(--red-primary); }
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .contact-form input,
+  .contact-form textarea {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    color: var(--ink);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
+  }
+  .contact-form input::placeholder,
+  .contact-form textarea::placeholder { color: var(--ink-dim); }
+  .contact-form input:focus,
+  .contact-form textarea:focus { outline: none; border-color: var(--red-primary); }
+  .contact-form button { align-self: flex-start; cursor: pointer; border: none; }
+  .contact-status { font-size: 0.82rem; min-height: 1.2em; margin: 0; color: var(--ink-dim); }
+  .contact-status.success { color: #5fd68f; }
+  .contact-status.error { color: var(--red-primary); }
+
+  /* Like button on project cards */
+  .like-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--ink-dim);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.2s;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .like-btn:hover { border-color: var(--red-primary); color: var(--red-primary); }
+  .like-btn:disabled { opacity: 0.6; cursor: default; }
+
+  @media(max-width: 960px) {
+    .hero { flex-direction: column; height: auto; }
+    .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+    .hero-image-pane { position: relative; width: 100%; height: 525px; order: -1; display: flex; justify-content: center; padding-top: 100px; }
+    .hero-avatar-container { position: relative; height: 100%; width: auto; max-width: 100%; margin: 0 auto; }
+    .hero .container { padding-top: 0; }
+    .hero-content-box h1 { margin-top: 0; }
+    .hero-actions { flex-wrap: wrap; }
+    .hero-actions a { flex: 1 1 auto; text-align: center; }
+    .btn-hero-resume { flex: 0 0 100%; justify-content: center; margin-top: 8px; }
+    .hero-marquee-wrapper { position: relative; bottom: auto; left: auto; right: auto; margin-top: 20px; overflow: hidden; }
+    .hero-marquee-track { gap: 40px; }
+    .contact-section { padding: 60px 0; }
+    .main-split-view { grid-template-columns: 1fr; }
+    .column-left { border-right: none; padding-right: 0; }
+    .column-right { padding-left: 0; }
+  }
+
+  @media(max-width: 768px) {
+    .container { padding: 0 24px; }
+    nav .container { height: 72px; }
+    .nav-links, nav .btn-talk { display: none; }
+    .nav-toggle { display: flex; }
+    .column-left { padding: 60px 0 60px 0; }
+    .column-right { padding: 60px 0 60px 0; }
+    .section-title { font-size: 1.5rem; margin-bottom: 28px; }
+    .hero-content-box h1 { font-size: clamp(1.8rem, 5vw, 2.4rem); }
+    .hero-content-box p { font-size: 0.9rem; }
+    .project-info { flex-direction: column; align-items: stretch; }
+    .project-meta h3 { overflow-wrap: break-word; }
+    .project-tags { row-gap: 8px; }
+    .philosophy-player { padding: 28px 20px; }
+    .timeline-row { grid-template-columns: 1fr; gap: 6px; }
+    .timeline-time { font-size: 0.82rem; }
+    .footer-grid { flex-direction: column; gap: 16px; text-align: center; }
+    .footer-links { flex-wrap: wrap; justify-content: center; }
+    .hero-avatar-container { height: 90%; }
+  }
+
+  @media(max-width: 600px) {
+    .hero { min-height: 640px; }
+    .hero-image-pane { height: 425px; }
+    .dock-item { font-size: 0.75rem; }
+    .dock-item i { font-size: 1rem; }
+    .pillar-card { padding: 24px; }
+    .contact-links a { width: 100%; justify-content: center; }
+  }
+
+  @media(max-width: 480px) {
+    .container { padding: 0 16px; }
+    nav .container { height: 64px; }
+    .hero-content-box h1 { font-size: clamp(1.4rem, 6vw, 1.8rem); }
+    .hero-content-box p { font-size: 0.84rem; margin-bottom: 24px; }
+    .btn-hero-talk, .btn-hero-chat, .btn-hero-resume { padding: 12px 20px; font-size: 0.82rem; }
+    .hero-image-pane { height: 350px; }
+    .column-left { padding: 40px 0 40px 0; }
+    .column-right { padding: 40px 0 40px 0; }
+    .project-window { aspect-ratio: 16/9; }
+    .like-btn { font-size: 0.72rem; padding: 4px 12px; }
+    .project-link-icon { width: 30px; height: 30px; }
+    .contact-section { padding: 40px 0; }
+    .contact-grid { gap: 24px; }
+    .philosophy-player { padding: 20px 16px; }
+    .footer-links { gap: 16px; }
+    .footer-links a { font-size: 0.8rem; }
+    .mobile-nav-drawer { width: 100vw; padding: 90px 24px 32px; }
+    .hero-marquee-track { gap: 24px; animation-duration: 20s; }
+  }
+
+  @media(max-width: 360px) {
+    .hero-content-box h1 { font-size: 1.3rem; }
+    .section-title { font-size: 1.3rem; }
+    .btn-hero-talk, .btn-hero-chat, .btn-hero-resume { padding: 10px 16px; font-size: 0.78rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <div class="logo-area">
+      <div class="logo-box">NA</div>
+      naol.ayele
+    </div>
+    <div class="nav-links">
+      <a href="#projects">Projects</a>
+      <a href="#solutions">Solutions</a>
+      <a href="#experience">Journey</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <a class="btn-talk" href="#contact">Let's Talk</a>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="nav-scrim" id="nav-scrim"></div>
+<div class="mobile-nav-drawer" id="mobile-nav-drawer">
+  <a href="#projects">Projects</a>
+  <a href="#solutions">Solutions</a>
+  <a href="#experience">Journey</a>
+  <a href="#contact">Contact</a>
+  <a class="btn-talk" href="#contact">Let's Talk</a>
+</div>
+
+<header class="hero">
+  <div class="hero-image-pane">
+    <div class="hero-avatar-container">
+      <img src="naol-photo.png" alt="Naol Ayele" class="hero-avatar">
+    </div>
+  </div>
+  <div class="hero-grid-overlay"></div>
+  <div class="hero-bottom-fade"></div>
+  
+  <div class="container">
+    <div class="hero-content-box">
+      <h1>Engineering <span>scalable</span> backend systems for modern enterprises</h1>
+      <p>Full Stack Developer with 2+ years of experience building scalable web and mobile applications. Specialized in backend architecture, system design, and production deployment. Proven ability to design secure, high-performance systems handling complex business logic.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-hero-talk">Let's Talk</a>
+        <a href="https://wa.me/251988662556" class="btn-hero-chat" target="_blank">WhatsApp</a>
+        <a href="Naol Ayele.pdf" class="btn-hero-resume" target="_blank">Download Resume <span style="font-size:0.75rem">↓</span></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-marquee-wrapper">
+    <div class="hero-marquee-track">
+      <div class="dock-item"><i class="devicon-nodejs-plain"></i> Nodejs</div>
+      <div class="dock-item"><i class="devicon-express-original"></i> ExpressJs</div>
+      <div class="dock-item"><i class="devicon-spring-plain"></i> Springboot</div>
+      <div class="dock-item"><i class="devicon-python-plain"></i> Python</div>
+      <div class="dock-item"><i class="devicon-typescript-plain"></i> TypeScript</div>
+      <div class="dock-item"><i class="devicon-dart-plain"></i> Dart</div>
+      <div class="dock-item"><i class="devicon-flutter-plain"></i> Flutter</div>
+      <div class="dock-item"><i class="devicon-postgresql-plain"></i> Postgres</div>
+      <div class="dock-item"><i class="devicon-redis-plain"></i> Redis</div>
+      <div class="dock-item"><i class="devicon-docker-plain"></i> Docker</div>
+      <div class="dock-item"><i class="devicon-supabase-plain"></i> supabase</div>
+      <div class="dock-item"><i class="devicon-javascript-plain"></i> javascript</div>
+      <div class="dock-item"><i class="devicon-mongodb-plain"></i> mongodb</div>
+      <div class="dock-item"><i class="devicon-nodejs-plain"></i> Nodejs</div>
+      <div class="dock-item"><i class="devicon-express-original"></i> ExpressJs</div>
+      <div class="dock-item"><i class="devicon-spring-plain"></i> Springboot</div>
+      <div class="dock-item"><i class="devicon-python-plain"></i> Python</div>
+      <div class="dock-item"><i class="devicon-typescript-plain"></i> TypeScript</div>
+      <div class="dock-item"><i class="devicon-dart-plain"></i> Dart</div>
+      <div class="dock-item"><i class="devicon-flutter-plain"></i> Flutter</div>
+      <div class="dock-item"><i class="devicon-postgresql-plain"></i> Postgres</div>
+      <div class="dock-item"><i class="devicon-redis-plain"></i> Redis</div>
+      <div class="dock-item"><i class="devicon-docker-plain"></i> Docker</div>
+      <div class="dock-item"><i class="devicon-supabase-plain"></i> supabase</div>
+      <div class="dock-item"><i class="devicon-javascript-plain"></i> javascript</div>
+      <div class="dock-item"><i class="devicon-mongodb-plain"></i> mongodb</div>
+    </div>
+  </div>
+</header>
+
+<main class="container main-split-view">
+  
+  <!-- Left Column: Featured Solutions & Projects -->
+  <section class="column-left" id="projects">
+    <div class="section-title">
+      <span>Work</span>
+      Featured Solutions &amp; Projects
+    </div>
+    
+    <div class="project-list">
+      <!-- Project 1 -->
+      <div class="project-card">
+        <a href="https://conwise.vercel.app/" target="_blank" style="text-decoration:none;color:inherit;display:contents;">
+          <div class="project-window">
+            <img src="images/conwise-thumb.jpg" alt="ConWise" style="width:100%;height:100%;object-fit:cover;">
+          </div>
+        </a>
+        <div class="project-info">
+          <div class="project-meta">
+            <h3>ConWise — Construction Project Collaboration System</h3>
+            <p>Construction Project Collaboration and Reporting System (Final Year Project) — a Node.js/Express API with a Next.js/React dashboard supporting admin, project manager, site engineer, and supervisor roles.</p>
+            <div class="project-tags">
+              <span>JavaScript</span><span>Node.js</span><span>Next.js</span><span>PostgreSQL</span><span>Docker</span>
+            </div>
+          </div>
+          <div class="project-links-row">
+            <a href="https://github.com/ConWise-System/ConWise" target="_blank" class="project-link-icon"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+            <a href="https://conwise.vercel.app/" target="_blank" class="project-link-icon">&#x1F517;</a>
+            <button class="like-btn" data-slug="conwise">&#9829; <span class="like-count">0</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 2 -->
+      <div class="project-card-hack">
+        <a class="project-card" href="https://github.com/naol-ayele/ZenaTech" target="_blank">
+          <div class="project-window">
+            <img src="images/zenatech-thumb.jpg" alt="ZenaTech" style="width:100%;height:100%;object-fit:cover;">
+          </div>
+        </a>
+        <div class="project-info">
+          <div class="project-meta">
+          <h3>ZenaTech — Tech News Aggregator</h3>
+          <p>Flutter + Node.js tech news aggregator for Ethiopia & East Africa, with offline reading, local tech coverage, and ad-supported free access.</p>
+          <div class="project-tags">
+            <span>Flutter</span><span>Dart</span><span>Node.js</span><span>PostgreSQL</span>
+          </div>
+          </div>
+          <div class="project-links-row">
+            <a href="https://github.com/naol-ayele/ZenaTech" target="_blank" class="project-link-icon"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+            <button class="like-btn" data-slug="zenatech">&#9829; <span class="like-count">0</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 3 -->
+      <div class="project-card-hack">
+        <a class="project-card" href="https://github.com/naol-ayele/Banking_Management_System" target="_blank">
+          <div class="project-window">
+            <img src="images/banking-thumb.png" alt="Banking Management System" style="width:100%;height:100%;object-fit:cover;">
+          </div>
+        </a>
+        <div class="project-info">
+          <div class="project-meta">
+          <h3>Banking Management System</h3>
+          <p>Banking Management System — a Spring Boot–based banking application that provides secure account management, transaction processing, and customer services. Supports multiple user roles, robust authentication (JWT), and integration with PostgreSQL.</p>
+          <div class="project-tags">
+            <span>Java</span><span>Spring Boot</span><span>PostgreSQL</span><span>JWT</span>
+          </div>
+          </div>
+          <div class="project-links-row">
+            <a href="https://github.com/naol-ayele/Banking_Management_System" target="_blank" class="project-link-icon"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+            <button class="like-btn" data-slug="banking-system">&#9829; <span class="like-count">0</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 4 -->
+      <div class="project-card-hack">
+        <a class="project-card" href="https://github.com/naol-ayele/LeafGuard_Ai-Powered-Plant-Disease-Indentification" target="_blank">
+          <div class="project-window">
+            <img src="images/leafguard-thumb.png" alt="LeafGuard" style="width:100%;height:100%;object-fit:cover;">
+          </div>
+        </a>
+        <div class="project-info">
+          <div class="project-meta">
+          <h3>LeafGuard — AI Plant Disease Identifier</h3>
+          <p>Offline-first AI-powered mobile app for identifying plant diseases using a quantized MobileNetV2 CNN (TFLite) with a Node.js/PostgreSQL backend for cloud sync.</p>
+          <div class="project-tags">
+            <span>Flutter</span><span>Dart</span><span>Node.js</span><span>PostgreSQL</span><span>TensorFlow Lite</span><span>Python</span>
+          </div>
+          </div>
+          <div class="project-links-row">
+            <a href="https://github.com/naol-ayele/LeafGuard_Ai-Powered-Plant-Disease-Indentification" target="_blank" class="project-link-icon"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+            <button class="like-btn" data-slug="leafguard">&#9829; <span class="like-count">0</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Right Column: Philosophy, Value Pillars, & Journey Timeline -->
+  <section class="column-right" id="solutions">
+    <div class="section-title">
+      <span>Expertise</span>
+      Technical Proficiencies
+    </div>
+    
+    <div class="pillars-grid">
+      <div class="pillar-card">
+        <h4>Languages &amp; Frameworks</h4>
+        <p>Java, JavaScript/TypeScript, Python, Dart — Spring Boot, Node.js, Express.js, FastAPI, Hibernate, Prisma ORM.</p>
+      </div>
+      <div class="pillar-card">
+        <h4>Databases &amp; Infrastructure</h4>
+        <p>PostgreSQL, MongoDB, Redis, SQLite. Docker, Docker Compose, Linux/Unix, CI/CD pipelines, and cloud deployment workflows.</p>
+      </div>
+      <div class="pillar-card">
+        <h4>System Design &amp; Architecture</h4>
+        <p>RESTful API design, monolithic architecture, RBAC, multi-file architecture, system security, and performance optimization.</p>
+      </div>
+      <div class="pillar-card">
+        <h4>Testing &amp; Quality</h4>
+        <p>Jest, Supertest, unit testing, TDD/BDD, code review, static analysis, and production debugging practices.</p>
+      </div>
+    </div>
+
+    <div class="philosophy-player">
+      <div style="width:54px;height:54px;background:#FFF;color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.05rem;font-weight:700;z-index:2;">BSc</div>
+      <div style="font-size:0.9rem; font-weight:500; z-index:2;">Software Engineering Degree</div>
+      <div style="font-size:0.78rem; color:var(--ink-dim); max-width:300px; z-index:2;">Adama Science and Technology University &middot; 2022–2026<br>Relevant Coursework: Python, C++, Java, Advanced Programming, Data Structures and Algorithms, Machine Learning, Computer Vision, Natural Language Processing, Operating Systems, Computer Security, System Architecture, Component-Based Software Development, Cybersecurity</div>
+    </div>
+
+    <!-- Milestones & Journey Subsection -->
+    <div class="section-title" id="experience" style="margin-top:100px;">
+      <span>Experience</span>
+      Professional milestones &amp; impact
+    </div>
+
+    <div class="timeline-container">
+      <div class="timeline-row">
+        <div class="timeline-time">01/2025 — 08/2025</div>
+        <div class="timeline-desc">
+          <h5>Backend Developer &middot; Cooperative Bank of Oromia</h5>
+          <p>Engineered Spring Boot banking applications with 99.95% uptime processing 10K+ daily transactions. Implemented JWT auth and 5-tier RBAC. Designed PostgreSQL schema for sub-100ms response times.</p>
+        </div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-time">07/2024 — 12/2024</div>
+        <div class="timeline-desc">
+          <h5>Backend Developer &middot; Ethronics (IRAS)</h5>
+          <p>Built RESTful APIs for healthcare scheduling using Node.js and Express.js. Designed schemas for appointment management. Optimized queries and integrated backend services with frontend teams.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Contact Section -->
+<section class="contact-section" id="contact">
+  <div class="container">
+    <div class="section-title">
+      <span>Let's Connect</span>
+      Get In Touch
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <p>Open to backend, full-stack, and mobile engineering roles — or just a conversation about system design and architecture. Send a message and I'll get back to you.</p>
+        <div class="contact-links">
+          <a href="mailto:naolayele85@gmail.com">&#9993; naolayele85@gmail.com</a>
+          <a href="https://wa.me/251988662556" target="_blank">WhatsApp</a>
+          <a href="https://github.com/naol-ayele" target="_blank">GitHub</a>
+          <a href="https://www.linkedin.com/in/naol-ayele/" target="_blank">LinkedIn</a>
+        </div>
+      </div>
+      <form id="contact-form" class="contact-form">
+        <input type="text" name="name" placeholder="Your name" required>
+        <input type="email" name="email" placeholder="Your email" required>
+        <textarea name="message" rows="4" placeholder="What's on your mind?" required></textarea>
+        <button type="submit" class="btn-hero-talk" id="contact-submit">Send message</button>
+        <p id="contact-status" class="contact-status"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container footer-grid">
+    <div>&copy; 2026 Naol Ayele &middot; +251-988-662-556</div>
+    <div class="footer-links">
+      <a href="https://github.com/naol-ayele" target="_blank">GitHub</a>
+      <a href="https://www.linkedin.com/in/naol-ayele/" target="_blank">LinkedIn</a>
+      <a href="mailto:naolayele85@gmail.com">Email</a>
+      <a href="tel:+251988662556">Phone</a>
+      <a href="https://wa.me/251988662556" target="_blank">WhatsApp</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const API_BASE = "http://localhost:4000";
+
+  // ---------- 1. Mobile navigation ----------
+  function initMobileNav() {
+    var toggle = document.getElementById("nav-toggle");
+    var drawer = document.getElementById("mobile-nav-drawer");
+    var scrim = document.getElementById("nav-scrim");
+    if (!toggle || !drawer || !scrim) return;
+
+    function closeNav() {
+      toggle.classList.remove("open");
+      drawer.classList.remove("open");
+      scrim.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+    function openNav() {
+      toggle.classList.add("open");
+      drawer.classList.add("open");
+      scrim.classList.add("open");
+      toggle.setAttribute("aria-expanded", "true");
+    }
+
+    toggle.addEventListener("click", function () {
+      var isOpen = drawer.classList.contains("open");
+      if (isOpen) closeNav(); else openNav();
+    });
+    scrim.addEventListener("click", closeNav);
+    drawer.querySelectorAll("a").forEach(function (link) {
+      link.addEventListener("click", closeNav);
+    });
+  }
+
+  // ---------- 2. Analytics pageview ping ----------
+  function initAnalytics() {
+    fetch(API_BASE + "/api/analytics/pageview", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path: window.location.pathname, referrer: document.referrer }),
+    }).catch(function () {});
+  }
+
+  // ---------- 3. Load live like counts for each project ----------
+  function loadProjectLikeCounts() {
+    fetch(API_BASE + "/api/projects")
+      .then(function (r) { return r.json(); })
+      .then(function (projects) {
+        projects.forEach(function (p) {
+          var btn = document.querySelector('.like-btn[data-slug="' + p.slug + '"]');
+          if (btn) btn.querySelector(".like-count").textContent = p.likes;
+        });
+      })
+      .catch(function () {});
+  }
+
+  // ---------- 4. Like button interactions ----------
+  function initLikeButtons() {
+    var liked = JSON.parse(localStorage.getItem("portfolio-liked") || "{}");
+
+    document.querySelectorAll(".like-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var slug = btn.dataset.slug;
+        var action = liked[slug] ? "unlike" : "like";
+        btn.disabled = true;
+        fetch(API_BASE + "/api/projects/" + slug + "/like", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: action }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            btn.querySelector(".like-count").textContent = data.likes;
+            liked[slug] = action === "like";
+            localStorage.setItem("portfolio-liked", JSON.stringify(liked));
+          })
+          .catch(function (e) { console.warn("Like failed:", e); })
+          .finally(function () { btn.disabled = false; });
+      });
+    });
+  }
+
+  // ---------- 5. Contact form submission ----------
+  function initContactForm() {
+    var contactForm = document.getElementById("contact-form");
+    var contactStatus = document.getElementById("contact-status");
+    var contactSubmit = document.getElementById("contact-submit");
+    if (!contactForm) return;
+
+    contactForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var data = Object.fromEntries(new FormData(contactForm).entries());
+
+      contactSubmit.disabled = true;
+      contactStatus.textContent = "Sending\u2026";
+      contactStatus.className = "contact-status";
+
+      fetch(API_BASE + "/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+        .then(function (r) {
+          if (!r.ok) throw new Error("Something went wrong");
+          contactStatus.textContent = "Message sent \u2014 thanks! I'll get back to you soon.";
+          contactStatus.classList.add("success");
+          contactForm.reset();
+        })
+        .catch(function (err) {
+          contactStatus.textContent = "Couldn't send: " + err.message;
+          contactStatus.classList.add("error");
+        })
+        .finally(function () {
+          contactSubmit.disabled = false;
+        });
+    });
+  }
+
+  // ---------- Page init: run in a sensible order ----------
+  function init() {
+    initMobileNav();       // UI interactions first, no network dependency
+    initAnalytics();        // fire-and-forget tracking ping
+    loadProjectLikeCounts(); // populate like counts from the backend
+    initLikeButtons();      // wire up interactions once counts are loading
+    initContactForm();      // set up the contact form last
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+</script>
+
+</body>
+</html>
