@@ -1,10 +1,10 @@
 const { Pool } = require("pg");
 
+const connectionString = (process.env.DATABASE_URL || "").replace(/sslmode=[^&]+&?/, "").replace(/[?&]$/, "");
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL
-    ? { rejectUnauthorized: false }
-    : false,
+  connectionString,
+  ssl: connectionString ? { rejectUnauthorized: false } : false,
 });
 
 pool.on("error", (err) => console.error("Postgres pool error:", err.message));
