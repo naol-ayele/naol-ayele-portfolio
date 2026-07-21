@@ -1,13 +1,44 @@
 const express = require("express");
-const { Resend } = require("resend");
+const https = require("https");
 const db = require("../db");
 const requireAdmin = require("../middleware/requireAdmin");
 
 const router = express.Router();
 
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null;
+function sendResendEmail({ to, replyTo, subject, text }) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify({
+      from: "Portfolio Contact <onboarding@resend.dev>",
+      to,
+      replyTo,
+      subject,
+      text,
+    });
+    const req = https.request(
+      {
+        hostname: "api.resend.com",
+        path: "/emails",
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(data),
+        },
+      },
+      (res) => {
+        let body = "";
+        res.on("data", (c) => (body += c));
+        res.on("end", () => {
+          if (res.statusCode === 200) resolve();
+          else reject(new Error(`Resend API ${res.statusCode}: ${body}`));
+        });
+      }
+    );
+    req.on("error", reject);
+    req.write(data);
+    req.end();
+  });
+}
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -44,16 +75,13 @@ router.post("/", async (req, res) => {
       [name.trim(), email.trim(), message.trim()]
     );
 
-    if (resend && process.env.CONTACT_TO_EMAIL) {
-      resend.emails
-        .send({
-          from: "Portfolio Contact <onboarding@resend.dev>",
-          to: process.env.CONTACT_TO_EMAIL,
-          replyTo: email,
-          subject: `New portfolio message from ${name}`,
-          text: message,
-        })
-        .catch((err) => console.error("Email send failed:", err));
+    if (process.env.RESEND_API_KEY && process.env.CONTACT_TO_EMAIL) {
+      sendResendEmail({
+        to: process.env.CONTACT_TO_EMAIL,
+        replyTo: email,
+        subject: `New portfolio message from ${name}`,
+        text: message,
+      }).catch((err) => console.error("Email send failed:", err));
     }
 
     res.status(201).json({ ok: true, id: result.rows[0].id });
