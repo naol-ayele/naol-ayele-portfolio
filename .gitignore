@@ -1,0 +1,8 @@
+node_modules/
+.env
+data/*.db
+data/*.db-wal
+data/*.db-shm
+*.log
+naol-ayele-portfolio-v2.html
+portfolio-backend/package-lock.json
