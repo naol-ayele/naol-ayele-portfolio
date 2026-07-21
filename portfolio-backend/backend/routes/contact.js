@@ -22,12 +22,16 @@ if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
   });
 }
 
-// GET /api/contacts — list all messages (admin only)
-router.get("/", requireAdmin, (req, res) => {
-  const rows = db
-    .prepare("SELECT id, name, email, message, created_at FROM contacts ORDER BY created_at DESC")
-    .all();
-  res.json(rows);
+router.get("/", requireAdmin, async (req, res) => {
+  try {
+    const result = await db.query(
+      "SELECT id, name, email, message, created_at FROM contacts ORDER BY created_at DESC"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
 router.post("/", async (req, res) => {
@@ -43,25 +47,29 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: "Message is too long" });
   }
 
-  const stmt = db.prepare(
-    "INSERT INTO contacts (name, email, message) VALUES (?, ?, ?)"
-  );
-  const result = stmt.run(name.trim(), email.trim(), message.trim());
+  try {
+    const result = await db.query(
+      "INSERT INTO contacts (name, email, message) VALUES ($1, $2, $3) RETURNING id",
+      [name.trim(), email.trim(), message.trim()]
+    );
 
-  // Fire-and-forget email notification — contact form still succeeds even if this fails
-  if (transporter && process.env.CONTACT_TO_EMAIL) {
-    transporter
-      .sendMail({
-        from: `"Portfolio Contact" <${process.env.SMTP_USER}>`,
-        to: process.env.CONTACT_TO_EMAIL,
-        replyTo: email,
-        subject: `New portfolio message from ${name}`,
-        text: message,
-      })
-      .catch((err) => console.error("Email send failed:", err.message));
+    if (transporter && process.env.CONTACT_TO_EMAIL) {
+      transporter
+        .sendMail({
+          from: `"Portfolio Contact" <${process.env.SMTP_USER}>`,
+          to: process.env.CONTACT_TO_EMAIL,
+          replyTo: email,
+          subject: `New portfolio message from ${name}`,
+          text: message,
+        })
+        .catch((err) => console.error("Email send failed:", err.message));
+    }
+
+    res.status(201).json({ ok: true, id: result.rows[0].id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database error" });
   }
-
-  res.status(201).json({ ok: true, id: result.lastInsertRowid });
 });
 
 module.exports = router;

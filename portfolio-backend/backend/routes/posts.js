@@ -12,25 +12,35 @@ function slugify(title) {
     .replace(/(^-|-$)/g, "");
 }
 
-// GET /api/posts — list published posts (newest first)
-router.get("/", (req, res) => {
-  const rows = db
-    .prepare("SELECT slug, title, created_at FROM posts WHERE published = 1 ORDER BY created_at DESC")
-    .all();
-  res.json(rows);
+router.get("/", async (req, res) => {
+  try {
+    const result = await db.query(
+      "SELECT slug, title, created_at FROM posts WHERE published = 1 ORDER BY created_at DESC"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
-// GET /api/posts/:slug — single post
-router.get("/:slug", (req, res) => {
-  const row = db
-    .prepare("SELECT slug, title, body, created_at FROM posts WHERE slug = ? AND published = 1")
-    .get(req.params.slug);
-  if (!row) return res.status(404).json({ error: "Post not found" });
-  res.json(row);
+router.get("/:slug", async (req, res) => {
+  try {
+    const result = await db.query(
+      "SELECT slug, title, body, created_at FROM posts WHERE slug = $1 AND published = 1",
+      [req.params.slug]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
-// POST /api/posts — create a post (admin only, requires x-api-key header)
-router.post("/", requireAdmin, (req, res) => {
+router.post("/", requireAdmin, async (req, res) => {
   const { title, body, published = true } = req.body || {};
   if (!title || !body) {
     return res.status(400).json({ error: "title and body are required" });
@@ -38,15 +48,17 @@ router.post("/", requireAdmin, (req, res) => {
 
   const slug = slugify(title);
   try {
-    const result = db
-      .prepare("INSERT INTO posts (slug, title, body, published) VALUES (?, ?, ?, ?)")
-      .run(slug, title.trim(), body.trim(), published ? 1 : 0);
-    res.status(201).json({ ok: true, slug, id: result.lastInsertRowid });
+    const result = await db.query(
+      "INSERT INTO posts (slug, title, body, published) VALUES ($1, $2, $3, $4) RETURNING id",
+      [slug, title.trim(), body.trim(), published ? 1 : 0]
+    );
+    res.status(201).json({ ok: true, slug, id: result.rows[0].id });
   } catch (err) {
-    if (String(err.message).includes("UNIQUE")) {
+    if (String(err.message).includes("unique")) {
       return res.status(409).json({ error: "A post with that title/slug already exists" });
     }
-    throw err;
+    console.error(err);
+    res.status(500).json({ error: "Database error" });
   }
 });
 

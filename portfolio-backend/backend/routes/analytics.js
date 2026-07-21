@@ -4,34 +4,41 @@ const requireAdmin = require("../middleware/requireAdmin");
 
 const router = express.Router();
 
-// POST /api/analytics/pageview — log a page visit (call once per page load)
-router.post("/pageview", (req, res) => {
+router.post("/pageview", async (req, res) => {
   const { path: pagePath, referrer } = req.body || {};
   if (!pagePath) {
     return res.status(400).json({ error: "path is required" });
   }
-  db.prepare("INSERT INTO pageviews (path, referrer) VALUES (?, ?)").run(
-    pagePath,
-    referrer || null
-  );
-  res.status(201).json({ ok: true });
+
+  try {
+    await db.query(
+      "INSERT INTO pageviews (path, referrer) VALUES ($1, $2)",
+      [pagePath, referrer || null]
+    );
+    res.status(201).json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
-// GET /api/analytics/summary — totals per path, last 30 days (admin only)
-router.get("/summary", requireAdmin, (req, res) => {
-  const totals = db
-    .prepare(
-      `SELECT path, COUNT(*) as views
+router.get("/summary", requireAdmin, async (req, res) => {
+  try {
+    const totals = await db.query(
+      `SELECT path, COUNT(*)::int AS views
        FROM pageviews
-       WHERE created_at >= datetime('now', '-30 days')
+       WHERE created_at >= NOW() - INTERVAL '30 days'
        GROUP BY path
        ORDER BY views DESC`
-    )
-    .all();
-  const totalViews = db
-    .prepare(`SELECT COUNT(*) as count FROM pageviews WHERE created_at >= datetime('now', '-30 days')`)
-    .get();
-  res.json({ totalViews: totalViews.count, byPath: totals });
+    );
+    const totalViews = await db.query(
+      `SELECT COUNT(*)::int AS count FROM pageviews WHERE created_at >= NOW() - INTERVAL '30 days'`
+    );
+    res.json({ totalViews: totalViews.rows[0].count, byPath: totals.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
 module.exports = router;
