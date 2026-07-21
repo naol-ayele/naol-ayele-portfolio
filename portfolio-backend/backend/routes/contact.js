@@ -62,7 +62,7 @@ router.post("/", async (req, res) => {
           subject: `New portfolio message from ${name}`,
           text: message,
         })
-        .catch((err) => console.error("Email send failed:", err.message));
+        .catch((err) => console.error("Email send failed:", err));
     }
 
     res.status(201).json({ ok: true, id: result.rows[0].id });

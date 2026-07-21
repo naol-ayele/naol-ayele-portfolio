@@ -9,6 +9,7 @@ const postRoutes = require("./routes/posts");
 const analyticsRoutes = require("./routes/analytics");
 
 const app = express();
+app.set('trust proxy', 1);
 
 // ---------- middleware ----------
 app.use(express.json({ limit: "100kb" }));
