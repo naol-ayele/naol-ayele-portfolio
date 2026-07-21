@@ -1,25 +1,16 @@
 const express = require("express");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 const db = require("../db");
 const requireAdmin = require("../middleware/requireAdmin");
 
 const router = express.Router();
 
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
+
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-let transporter = null;
-if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-  transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 465),
-    secure: Number(process.env.SMTP_PORT || 465) === 465,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
 }
 
 router.get("/", requireAdmin, async (req, res) => {
@@ -53,10 +44,10 @@ router.post("/", async (req, res) => {
       [name.trim(), email.trim(), message.trim()]
     );
 
-    if (transporter && process.env.CONTACT_TO_EMAIL) {
-      transporter
-        .sendMail({
-          from: `"Portfolio Contact" <${process.env.SMTP_USER}>`,
+    if (resend && process.env.CONTACT_TO_EMAIL) {
+      resend.emails
+        .send({
+          from: "Portfolio Contact <onboarding@resend.dev>",
           to: process.env.CONTACT_TO_EMAIL,
           replyTo: email,
           subject: `New portfolio message from ${name}`,
